@@ -1,0 +1,8 @@
+# Create an Assembly Language version of the sketch.
+
+# Define the command we wish to use.
+compiler.objdump.cmd=avr-objdump
+
+# The following is all on a single line!
+recipe.hooks.linking.postlink.01.pattern="{compiler.objdump.cmd}.sh" "{compiler.path}{compiler.objdump.cmd}" "{build.path}/{build.project_name}.elf" "{build.path}/{build.project_name}.asm"
+

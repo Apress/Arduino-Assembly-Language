@@ -1,0 +1,18 @@
+## See https://github.com/arduino/ArduinoCore-avr/issues/554
+
+# Fallback property definition for compatibility with 
+# development tools that don't have the "Optimize for 
+# Debugging" control.
+compiler.optimization_flags=-Os -g
+
+# See: https://arduino.github.io/arduino-cli/latest/platform-specification/#optimization-level-for-debugging
+compiler.optimization_flags.release=-Os -g
+compiler.optimization_flags.debug=-O0 -g
+
+compiler.c.flags=-c {compiler.optimization_flags} {compiler.warning_flags} -std=gnu11 -ffunction-sections -fdata-sections -MMD -flto -fno-fat-lto-objects
+
+compiler.c.elf.flags={compiler.warning_flags} {compiler.optimization_flags} -flto -fuse-linker-plugin -Wl,--gc-sections
+
+compiler.cpp.flags=-c {compiler.optimization_flags} {compiler.warning_flags} -std=gnu++11 -fpermissive -fno-exceptions -ffunction-sections -fdata-sections -fno-threadsafe-statics -Wno-error=narrowing -MMD -flto
+
+

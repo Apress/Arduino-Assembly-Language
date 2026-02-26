@@ -1,0 +1,16 @@
+# Syntax Coloring Map
+
+# Classes (KEYWORD1)
+# Bold orange highlighting.
+
+# Class Methods & Functions (KEYWORD2)
+# Orange highlighting.
+
+UsartTX9600	KEYWORD2
+transmit_x	KEYWORD2
+transmit_z	KEYWORD2
+transmitByte	KEYWORD2
+
+# Others Constants (LITERAL1)
+# Light blue highlighting.
+

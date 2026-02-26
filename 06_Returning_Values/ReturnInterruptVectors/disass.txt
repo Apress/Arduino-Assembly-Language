@@ -1,0 +1,322 @@
+
+/tmp/arduino/sketches/A66A50D8ADF7D202D153B8A03BAF757C/ReturnInRAM.ino.elf:     file format elf32-avr
+
+; Global variable, wilma.
+fred_t *wilma;
+
+fred_t returnInRAM() {
+
+    201e:	push	r28     ; Save Y register
+    2020:	push	r29
+
+    ; These next two instructions simply reserve 2 bytes each
+    ; on the stack. One clock each, quicker than subtracting a word.
+    ; SP = SP-4. SP points at the next free slot on the stack.
+    2022:	rcall	.+0    ; SP-=2
+    2024:	rcall	.+0    ; SP-=2
+
+    ; Fetch the new SP into the Y register.
+    2026:	in	r28, SPL
+    2028:	in	r29, SPH
+
+    ; Registers R24:R25 hold the location of the result buffer.
+    ; Stored in Y+3,Y+4 on the stack, for later.
+    202a:	std	Y+4, r25	; 0x04
+    202c:	std	Y+3, r24	; 0x03
+
+    wilma = new(fred_t);
+
+    ; Request 0x10 bytes for a fred_t struct. Save the start of
+    ; the area allocated in 0x019C and 0x019D which is the (global) 
+    ; address of the wilma variable. A pointer takes 2 bytes.
+    202e:	ldi	r24, 0x0A	; 10
+    2030:	ldi	r25, 0x00	; 0
+    2032:	call	0xc16	; 0xc16 <_Znwj>
+    2036:	sts	0x019C, r25	; 0x80019c <wilma+0x1>
+    203a:	sts	0x019B, r24	; 0x80019b <wilma>
+
+    if (wilma) {
+
+    ; Did we get the requested RAM?
+    203e:	lds	r24, 0x019B	; 0x80019b <wilma>
+    2042:	lds	r25, 0x019C	; 0x80019c <wilma+0x1>
+    2046:	or	r24, r25
+    2048:	breq	.+114    	; 0x20bc <_Z11returnInRAMv+0x9e>
+
+        for (int y = 0; y < 6; y++) {
+
+    ; int y = 0; (R1 = 0)
+    204a:	std	Y+2, r1	; 0x02
+    204c:	std	Y+1, r1	; 0x01
+
+    ; R24:R25 = Y counter.
+    204e:	ldd	r24, Y+1	; 0x01
+    2050:	ldd	r25, Y+2	; 0x02
+
+    ; Bale out of loop when we get to 6.
+    2052:	sbiw	r24, 0x06	; 6
+    2054:	brge	.+40     	; 0x207e <_Z11returnInRAMv+0x60>
+
+            wilma->buffer[y] = PINB;
+
+    ; Address 0x23 is PINB.
+    2056:	ldi	r24, 0x23
+    2058:	ldi	r25, 0x00
+
+    ; Get wilma's pointer to struct.
+    205a:	lds	r18, 0x019B	; 0x80019b <wilma>
+    205e:	lds	r19, 0x019C	; 0x80019c <wilma+0x1>
+
+    ; Z points at PINB.
+    2062:	movw	r30, r24
+
+    ; Read a byte from PINB.
+    2064:	ld	r20, Z
+
+    ; Get current y counter.
+    2066:	ldd	r24, Y+1	; 0x01
+    2068:	ldd	r25, Y+2	; 0x02
+
+    ; Add to start of structure.
+    206a:	add	r24, r18
+    206c:	adc	r25, r19
+
+    ; Copy destination to Z. 
+    ; Store PINB byte in destination.
+    206e:	movw	r30, r24
+    2070:	st	Z, r20
+
+fred_t returnInRAM() {
+
+    wilma = new(fred_t);
+
+    if (wilma) {
+        for (int y = 0; y < 6; y++) {
+
+    ; y++
+    ; Get current y value.
+    2072:	89 81       	ldd	r24, Y+1	; 0x01
+    2074:	9a 81       	ldd	r25, Y+2	; 0x02
+
+    ; Increment it.
+    2076:	01 96       	adiw	r24, 0x01	; 1
+
+    ; Save as new y value.
+    2078:	9a 83       	std	Y+2, r25	; 0x02
+    207a:	89 83       	std	Y+1, r24	; 0x01
+
+    ; Skip back to test against 6.
+    207c:	e8 cf       	rjmp	.-48     	; 0x204e <_Z11returnInRAMv+0x30>
+
+            wilma->buffer[y] = PINB;
+
+        } // End of for loop.
+
+        wilma->barney = PIND;
+
+    207e:	89 e2       	ldi	r24, 0x29	; Address 0x29 is PIND.
+    2080:	90 e0       	ldi	r25, 0x00
+    2082:	fc 01       	movw	r30, r24 ; Z = PIND.
+    2084:	80 81       	ld	r24, Z      ; Read PIND via Z. Interesting.
+
+    ; R18:R19 = wilma pointer.
+    2086:	20 91 9b 01 	lds	r18, 0x019B	; 0x80019b <wilma>
+    208a:	30 91 9c 01 	lds	r19, 0x019C	; 0x80019c <wilma+0x1>
+
+    ; Extend PIND's byte value, to uint32_t.
+    208e:	88 2f       	mov	r24, r24
+    2090:	90 e0       	ldi	r25, 0x00	; 0
+    2092:	a0 e0       	ldi	r26, 0x00	; 0
+    2094:	b0 e0       	ldi	r27, 0x00	; 0
+
+    ; Get address of wilma pointer into Z.
+    2096:	f9 01       	movw	r30, r18
+
+    ; Store (uint32_t)PIND in wilma->barney.
+    2098:	86 83       	std	Z+6, r24	; 0x06
+    209a:	97 83       	std	Z+7, r25	; 0x07
+    209c:	a0 87       	std	Z+8, r26	; 0x08
+    209e:	b1 87       	std	Z+9, r27	; 0x09
+
+        return *wilma;
+
+    ; Wilma is a pointer, so two bytes. The variable wilma is
+    ; in locations 0x019B and 0x19C. Load the contents of those
+    ; addresses into R18:R19.    
+    20a0:	20 91 9b 01 	lds	r18, 0x019B	; 0x80019b <wilma>
+    20a4:	30 91 9c 01 	lds	r19, 0x019C	; 0x80019c <wilma+0x1>
+
+    ; R24:R25 will hold the destination address for the function result. 
+    ; This is obtained from Y+3 and Y+4.
+    20a8:	8b 81       	ldd	r24, Y+3	; 0x03
+    20aa:	9c 81       	ldd	r25, Y+4	; 0x04
+
+    ; There are 16 bytes to copy - the size of a fred_t struct.
+    20ac:	4a e0       	ldi	r20, 0x0A	; 10
+
+    ; The Z register points at *wilma.
+    ; The X register points at the result location.
+    20ae:	f9 01       	movw	r30, r18
+    20b0:	dc 01       	movw	r26, r24
+
+    ; Loop to copy 10 bytes from Z to X. These are the bytes of a fred_t struct.
+    20b2:	01 90       	ld	r0, Z+
+    20b4:	0d 92       	st	X+, r0
+    20b6:	4a 95       	dec	r20
+    20b8:	e1 f7       	brne	.-8      	; 0x20b2 <_Z11returnInRAMv+0x94>
+    20ba:	01 c0       	rjmp	.+2      	; 0x20be <_Z11returnInRAMv+0xa0>
+    } // end of for loop.
+} // end of function.
+    20bc:	00 00       	nop
+    20be:	8b 81       	ldd	r24, Y+3	; 0x03
+    20c0:	9c 81       	ldd	r25, Y+4	; 0x04
+    20c2:	0f 90       	pop	r0
+    20c4:	0f 90       	pop	r0
+    20c6:	0f 90       	pop	r0
+    20c8:	0f 90       	pop	r0
+    20ca:	df 91       	pop	r29
+    20cc:	cf 91       	pop	r28
+    20ce:	08 95       	ret
+
+000020d0 <setup>:
+
+
+void setup() {
+
+    ; Save Y register, then load it with the SP.
+    20d0:	push	r28
+    20d2:	push	r29
+    20d4:	in	r28, SPL
+    20d6:	in	r29, SPH
+
+    ; Subtract 0x10 from Y to create a stack frame.
+    ; The stack frame will be used for:
+    ;
+    ; Y+1:2 = local loop counter 'int y'.
+    ; Y+3:6 = local variable 'uint32_t betty'.
+    ; Y+7:16 = local variable 'struct fred fred'.
+    ;
+    ; Then update the SP with the new Y value.
+    20d8:	sbiw	r28, 0x10
+    20da:	in	r0, SREG
+    20dc:	cli
+    20de:	out	0x3e, SPH
+    20e0:	out	0x3f, SREG
+    20e2:	out	0x3d, SPL
+
+  fred_t fred = returnInRAM();
+
+    ; Copy new Y value to R24:R25.
+    20e4:	movw	r24, r28
+
+    ; The stack frame is 16 bytes. Add 7 to R24:R24 to get the
+    ; address or local variable 'fred' for the result. Then call 
+    ; the function passing the address of 'fred' in R24:R25.
+    20e6:	07 96       	adiw	r24, 0x07	; 7
+    20e8:	0e 94 0f 10 	call	0x201e	; 0x201e <_Z11returnInRAMv>
+
+  uint32_t betty = fred.barney;
+
+    ; The barney member is 6 bytes on from the buffer start.
+    ; The buffer start is Y+7, hence, Y+13.
+    20ec:	8d 85       	ldd	r24, Y+13	; fred.barney is at Y+13:16
+    20ee:	9e 85       	ldd	r25, Y+14
+    20f0:	af 85       	ldd	r26, Y+15
+    20f2:	b8 89       	ldd	r27, Y+16
+    20f4:	8b 83       	std	Y+3, r24	; Betty is at Y+3:6
+    20f6:	9c 83       	std	Y+4, r25
+    20f8:	ad 83       	std	Y+5, r26
+    20fa:	be 83       	std	Y+6, r27
+
+    Serial.begin(9600);
+    20fc:	40 e8       	ldi	r20, 0x80	; 128
+    20fe:	55 e2       	ldi	r21, 0x25	; 37
+    2100:	60 e0       	ldi	r22, 0x00	; 0
+    2102:	70 e0       	ldi	r23, 0x00	; 0
+    2104:	8d e9       	ldi	r24, 0x9D	; 157
+    2106:	91 e0       	ldi	r25, 0x01	; 1
+    2108:	0e 94 1b 0e 	call	0x1c36	; 0x1c36 <_ZN14HardwareSerial5beginEm>
+
+    Serial.println(betty);
+    210c:	8b 81       	ldd	r24, Y+3	; 0x03
+    210e:	9c 81       	ldd	r25, Y+4	; 0x04
+    2110:	ad 81       	ldd	r26, Y+5	; 0x05
+    2112:	be 81       	ldd	r27, Y+6	; 0x06
+    2114:	2a e0       	ldi	r18, 0x0A	; 10
+    2116:	30 e0       	ldi	r19, 0x00	; 0
+    2118:	ac 01       	movw	r20, r24
+    211a:	bd 01       	movw	r22, r26
+    211c:	8d e9       	ldi	r24, 0x9D	; 157
+    211e:	91 e0       	ldi	r25, 0x01	; 1
+    2120:	0e 94 8b 07 	call	0xf16	; 0xf16 <_ZN5Print7printlnEmi>
+
+    for (int y = 0; y < 6;y++) 
+
+    2124:	1a 82       	std	Y+2, r1	; 0x02
+    2126:	19 82       	std	Y+1, r1	; 0x01
+    2128:	89 81       	ldd	r24, Y+1	; 0x01
+    212a:	9a 81       	ldd	r25, Y+2	; 0x02
+    212c:	06 97       	sbiw	r24, 0x06	; 6
+    212e:	b4 f4       	brge	.+44     	; 0x215c <setup+0x8c>
+
+        Serial.println(fred.buffer[y]);
+    2130:	9e 01       	movw	r18, r28
+    2132:	29 5f       	subi	r18, 0xF9	; 249
+    2134:	3f 4f       	sbci	r19, 0xFF	; 255
+    2136:	89 81       	ldd	r24, Y+1	; 0x01
+    2138:	9a 81       	ldd	r25, Y+2	; 0x02
+    213a:	82 0f       	add	r24, r18
+    213c:	93 1f       	adc	r25, r19
+    213e:	fc 01       	movw	r30, r24
+    2140:	80 81       	ld	r24, Z
+    2142:	4a e0       	ldi	r20, 0x0A	; 10
+    2144:	50 e0       	ldi	r21, 0x00	; 0
+    2146:	68 2f       	mov	r22, r24
+    2148:	8d e9       	ldi	r24, 0x9D	; 157
+    214a:	91 e0       	ldi	r25, 0x01	; 1
+    214c:	0e 94 39 08 	call	0x1072	; 0x1072 <_ZN5Print7printlnEhi>
+
+  fred_t fred = returnInRAM();
+  uint32_t betty = fred.barney;
+
+    Serial.begin(9600);
+    Serial.println(betty);
+    for (int y = 0; y < 6;y++) 
+    2150:	89 81       	ldd	r24, Y+1	; 0x01
+    2152:	9a 81       	ldd	r25, Y+2	; 0x02
+    2154:	01 96       	adiw	r24, 0x01	; 1
+    2156:	9a 83       	std	Y+2, r25	; 0x02
+    2158:	89 83       	std	Y+1, r24	; 0x01
+    215a:	e6 cf       	rjmp	.-52     	; 0x2128 <setup+0x58>
+
+        Serial.println(fred.buffer[y]);
+
+    // Make sure we free the allocated RAM.
+    if (wilma)
+
+    215c:	80 91 9b 01 	lds	r24, 0x019B	; 0x80019b <wilma>
+    2160:	90 91 9c 01 	lds	r25, 0x019C	; 0x80019c <wilma+0x1>
+    2164:	89 2b       	or	r24, r25
+    2166:	31 f0       	breq	.+12     	; 0x2174 <setup+0xa4>
+
+        delete(wilma);
+
+    2168:	80 91 9b 01 	lds	r24, 0x019B	; 0x80019b <wilma>
+    216c:	90 91 9c 01 	lds	r25, 0x019C	; 0x80019c <wilma+0x1>
+    2170:	0e 94 7e 05 	call	0xafc	; 0xafc <_ZdlPv>
+
+}
+
+    ; setup() epilogue.
+    ; Undo the stack frame of 0x10 bytes allocated at start.
+    ; Reset the SP to its value on entry.
+    ; Restore the Y register from the stack.
+    2174:	60 96       	adiw	r28, 0x10	; 16
+    2176:	0f b6       	in	r0, SREG
+    2178:	f8 94       	cli
+    217a:	de bf       	out	SPH, r29	; 62
+    217c:	0f be       	out	SREG, r0	; 63
+    217e:	cd bf       	out	SPL, r28	; 61
+    2180:	df 91       	pop	r29
+    2182:	cf 91       	pop	r28
+    2184:	08 95       	ret

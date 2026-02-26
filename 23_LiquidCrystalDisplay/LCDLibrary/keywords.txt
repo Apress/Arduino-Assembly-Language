@@ -1,0 +1,44 @@
+# Syntax Highlighting Map
+#
+# Classes (KEYWORD1) - Bold orange highlighting.
+# Class Methods & Functions (KEYWORD2) - Orange highlighting.
+# Others (LITERAL1) - Light blue highlighting.
+#
+#
+# REMEMBER: The gaps in the following lines MUST be 
+# hard tabs, not spaces.
+
+LCDBegin	KEYWORD2
+LCDDisplayOn	KEYWORD2
+LCDDisplayOff	KEYWORD2
+LCDCursorOn	KEYWORD2
+LCDCursorOff	KEYWORD2
+LCDCursorAt	KEYWORD2
+LCDBlinkOn	KEYWORD2
+LCDBlinkOff	KEYWORD2
+LCDScrollLeft	KEYWORD2
+LCDScrollRight	KEYWORD2
+LCDLeftToRight	KEYWORD2
+LCDRightToLeft	KEYWORD2
+LCDAutoScroll	KEYWORD2
+LCDNoAutoScroll	KEYWORD2
+LCDClearDisplay	KEYWORD2
+LCDHomeCursor	KEYWORD2
+LCDSendZText	KEYWORD2
+LCDSendXText	KEYWORD2
+delayUSecs	KEYWORD2
+
+# Others Constants (LITERAL1)
+# Light blue highlighting.
+E	LITERAL1
+RS	LITERAL1
+RW	LITERAL1
+DB7	LITERAL1
+DB6	LITERAL1
+DB5	LITERAL1
+DB4	LITERAL1
+DATAPort	LITERAL1
+DATAConfigPort	LITERAL1
+CTRLPort	LITERAL1
+CTRLConfigPort	LITERAL1
+

@@ -1,0 +1,419 @@
+ManyParameters.ino.elf:     file format elf32-avr
+
+
+000000be <manyParameters>:
+;
+; The 5 is at the lowest address and is the first available
+; to "pop" off the stack.
+;
+manyParameters:
+     push r28           ; Save Y register.
+     push r29
+     in r28,SPL         ; Y = SP
+     in r29,SPH
+
+    ; RR <------ Y+3, Y+4
+    ; R29 <----- Y+2
+    ; R28 <----- Y+1
+    ; ? <------- SP & Y point here.
+
+     adiw r28,5         ; Y = parameters
+
+000000c8 <addRegisters>:
+
+addRegisters:
+    ; Here we add the parameters passed in 
+    ; registers to the registers used to return
+    ; the 32 bit result.
+    add r22,r18         ; Adding a + b
+    adc r23,r19
+    adc r24,r20
+    adc r25,r21
+
+    add r22,r14         ; Adding (a + b) + c
+    adc r23,r15
+    adc r24,r16
+    adc r25,r17
+
+    add r22,r10         ; Adding (a + b + c) + d
+    adc r23,r11
+    adc r24,r12
+    adc r25,r13
+
+000000e0 <addStackParams>:
+    ; Here we add the parameters passed on 
+    ; the stack to the registers used to return
+    ; the 32 bit result. We use R18 here.
+
+    ; There are 4 parameters to add.
+    ldi r19,4           ; Loop counter.
+
+000000e2 <addLoop>:
+
+addLoop:
+    ld r18,Y+           ; Adding next parameter.
+    add r22,r18         ; LSB
+    ld r18,Y+
+    adc r23,r18
+    ld r18,Y+
+    adc r24,r18
+    ld r18,Y+
+    adc r25,r18         ; MSB
+
+    dec r19             ; Reduce loop counter.
+    brne addLoop        ; Add 4 parameters in total.
+
+    pop r29             ; Restore Y register.
+    pop r28
+    ret
+
+
+
+00001e60 <setup>:
+                            uint32_t f,
+                            uint32_t g,
+                            uint32_t h);
+}
+
+void setup() {
+
+    1e60: push r2        ; Save a lot of working registsers
+    1e62: push r3
+    1e64: push r4
+    1e66: push r5
+    1e68: push r6
+    1e6a: push r7
+    1e6c: push r8
+    1e6e: push r9
+    1e70: push r10
+    1e72: push r11
+    1e74: push r12
+    1e76: push r13
+    1e78: push r14
+    1e7a: push r15
+    1e7c: push r16
+    1e7e: push r17
+    1e80: push r28
+    1e82: push r29
+    
+    1e84: in r28, SPL    ; Y = SP.
+    1e86: in r29, SPH    ; 
+    1e88: sbiw r28, 0x14 ; Y = SP-20.
+    1e8a: in r0, SREG    ; Read SREG.
+    1e8c: cli            ; No interrupts.
+    1e8e: out SPH, r29   ; SP = Y.
+    1e90: out SREG, r0   ; SREG - restore interrupt state.
+    1e92: out SPL, r28   ; Finish setting SP = Y (Old SP-20 bytes).
+    
+    ...   
+    
+    uint32_t a = 0x01234567;
+    
+    1ea4: ldi r24, 0x67  ; (Local) uint32_t A.
+    1ea6: ldi r25, 0x45
+    1ea8: ldi r26, 0x23
+    1eaa: ldi r27, 0x01
+    1eac: std Y+1, r24   ; Y+1:4 = A = 0x01234567
+    1eae: std Y+2, r25
+    1eb0: std Y+3, r26
+    1eb2: std Y+4, r27
+
+    // x = 36 * 19,088,743 = 687,194,748.
+    uint32_t x = manyParameters(a, a*2, a*3, a*4, a*5, a*6, a*7, a*8);
+    
+    1eb4: ldd r24, Y+1 ; Read A into R24:R27
+    1eb6: ldd r25, Y+2
+    1eb8: ldd r26, Y+3
+    1eba: ldd r27, Y+4
+    
+    1ebc: add r24, r24 ; A = A*2
+    1ebe: adc r25, r25
+    1ec0: adc r26, r26
+    1ec2: adc r27, r27
+    
+    1ec4: add r24, r24 ; A = A*4
+    1ec6: adc r25, r25
+    1ec8: adc r26, r26
+    1eca: adc r27, r27
+    
+    1ecc: add r24, r24 ; A = A*8
+    1ece: adc r25, r25
+    1ed0: adc r26, r26
+    1ed2: adc r27, r27
+    
+    1ed4: std Y+9, r24 ; Y+9--Y+12 = A*8 = param_H.
+    1ed6: std Y+10, r25
+    1ed8: std Y+11, r26
+    1eda: std Y+12, r27
+    
+    1edc: ldd r18, Y+1 ; Read A into R18:R22
+    1ede: ldd r19, Y+2
+    1ee0: ldd r20, Y+3
+    1ee2: ldd r21, Y+4
+    
+    1ee4: movw r26, r20 ; Copy A to R24:27
+    1ee6: movw r24, r18
+    
+    1ee8: add r24, r24 ; A = A * 2
+    1eea: adc r25, r25
+    1eec: adc r26, r26
+    1eee: adc r27, r27
+
+    1ef0: add r24, r24 ; A = A * 4
+    1ef2: adc r25, r25
+    1ef4: adc r26, r26
+    1ef6: adc r27, r27
+
+    1ef8: add r24, r24 ; A = A * 8
+    1efa: adc r25, r25
+    1efc: adc r26, r26
+    1efe: adc r27, r27
+
+    1f00: movw r10, r24 ; Save A * 8 in R10:13
+    1f02: movw r12, r26
+
+    1f04: sub r10, r18 ; Now A * 7 in R10:13 = param_G
+    1f06: sbc r11, r19
+    1f08: sbc r12, r20
+    1f0a: sbc r13, r21
+
+    1f0c: ldd r18, Y+1 ; Read A into R18:R22
+    1f0e: ldd r19, Y+2
+    1f10: ldd r20, Y+3
+    1f12: ldd r21, Y+4
+    
+    1f14: movw r26, r20 ; Copy A to R24:27
+    1f16: movw r24, r18    
+
+    1f18: add r24, r24 ; A * 2
+    1f1a: adc r25, r25
+    1f1c: adc r26, r26
+    1f1e: adc r27, r27   
+
+    1f20: add r24, r18 ; A * 3
+    1f22: adc r25, r19
+    1f24: adc r26, r20
+    1f26: adc r27, r21   
+
+    1f28: add r24, r24 ; A * 6
+    1f2a: adc r25, r25
+    1f2c: adc r26, r26
+    1f2e: adc r27, r27   
+
+    1f30: std Y+13, r24 ; Y+13--Y+16 = A*6 = param_F
+    1f32: std Y+14, r25
+    1f34: std Y+15, r26
+    1f36: std Y+16, r27  
+
+    1f38: ldd r18, Y+1 ; Read A into R18:R22
+    1f3a: ldd r19, Y+2
+    1f3c: ldd r20, Y+3
+    1f3e: ldd r21, Y+4 
+
+    1f40: movw r26, r20 ; Copy A to R24:27
+    1f42: movw r24, r18
+    
+    1f44: add r24, r24 ; A * 2
+    1f46: adc r25, r25
+    1f48: adc r26, r26
+    1f4a: adc r27, r27    
+
+    1f4c: add r24, r24 ; A * 4
+    1f4e: adc r25, r25
+    1f50: adc r26, r26
+    1f52: adc r27, r27    
+
+    1f54: movw r14, r24 ; Copy A * 4 to R14:17
+    1f56: movw r16, r26    
+
+    1f58: add r14, r18 ; A * 4 + A = A * 5.
+    1f5a: adc r15, r19 ; R14:17 = A * 5
+    1f5c: adc r16, r20
+    1f5e: adc r17, r21    
+
+    1f60: ldd r24, Y+1 ; Read A into R24:R27
+    1f62: ldd r25, Y+2
+    1f64: ldd r26, Y+3
+    1f66: ldd r27, Y+4    
+
+    1f68: movw r18, r24 ; Copy A to R18:21
+    1f6a: movw r20, r26    
+
+    1f6c: add r18, r18 ; A * 2
+    1f6e: adc r19, r19
+    1f70: adc r20, r20
+    1f72: adc r21, r21    
+
+    1f74: add r18, r18 ; A * 4
+    1f76: adc r19, r19
+    1f78: adc r20, r20
+    1f7a: adc r21, r21   
+
+    1f7c: std Y+17, r18 ; Y+17--Y+20 = A*4 = param_D
+    1f7e: std Y+18, r19
+    1f80: std Y+19, r20
+    1f82: std Y+20, r21   
+
+    1f84: ldd r18, Y+1 ; Read A into R18:R22
+    1f86: ldd r19, Y+2
+    1f88: ldd r20, Y+3
+    1f8a: ldd r21, Y+4    
+
+    1f8c: movw r26, r20 ; Copy A to R24:27
+    1f8e: movw r24, r18   
+
+    1f90: add r24, r24 ; A * 2
+    1f92: adc r25, r25
+    1f94: adc r26, r26
+    1f96: adc r27, r27    
+
+    1f98: movw r2, r24 ; R2:5 = A * 2
+    1f9a: movw r4, r26    
+
+    1f9c: add r2, r18 ; R2:5 = A * 3
+    1f9e: adc r3, r19
+    1fa0: adc r4, r20
+    1fa2: adc r5, r21
+    
+    1fa4: ldd r24, Y+1 ; Read A into R24:27
+    1fa6: ldd r25, Y+2
+    1fa8: ldd r26, Y+3
+    1faa: ldd r27, Y+4    
+
+    1fac: movw r18, r24 ; R18:21 = A
+    1fae: movw r20, r26   
+
+    1fb0: add r18, r18 ; A * 2
+    1fb2: adc r19, r19
+    1fb4: adc r20, r20
+    1fb6: adc r21, r21   
+
+    1fb8: ldd r6, Y+1 ; Read A into R6:9
+    1fba: ldd r7, Y+2
+    1fbc: ldd r8, Y+3
+    1fbe: ldd r9, Y+4
+    
+    ; At this point, we have:
+    
+    ; Y+1:4   = Local variable a
+    ; Y+5:8   = Local variable x
+    ; Y+9:12  = param_h = A*8
+    ; Y+13:16 = param_f = A*6
+    ; Y+17:20 = param_d = A*4
+    
+    ; R2:5    = param_c = A*3
+    ; R6:9    = A = param_a
+    ; R10:13  = param_g = A*7
+    ; R14:17  = param_e = A*5
+    ; R18:21  = param_b = A*2
+    ; R22:23  = 
+    ; R24:27  = A again
+    ; R28:29 (Y) = stack frame? 0x08D3
+    ; R30:31 (Z) = 
+    
+    
+    1fc0: ldd r24, Y+12 ; Stack A*8 = param_H MSB
+    1fc2: push r24
+    1fc4: ldd r24, Y+11
+    1fc6: push r24
+    1fc8: ldd r24, Y+10
+    1fca: push r24
+    1fcc: ldd r24, Y+9
+    1fce: push r24    ; LSB
+    
+    1fd0: mov r24, r13    ; Stack A*7 = param_G MSB
+    1fd2: push r24
+    1fd4: mov r24, r12
+    1fd6: push r24
+    1fd8: mov r24, r11
+    1fda: push r24
+    1fdc: mov r24, r10
+    1fde: push r24    ; LSB
+
+    1fe0: ldd r24, Y+16   ; Stack A*6 = param_F MSB 
+    1fe2: push r24
+    1fe4: ldd r24, Y+15
+    1fe6: push r24
+    1fe8: ldd r24, Y+14
+    1fea: push r24
+    1fec: ldd r24, Y+13
+    1fee: push r24
+    
+    1ff0: mov r24, r17  ; Stack A*5 = param_E MSB
+    1ff2: push r24
+    1ff4: mov r24, r16
+    1ff6: push r24
+    1ff8: mov r24, r15
+    1ffa: push r24
+    1ffc: mov r24, r14
+    1ffe: push r24    ; LSB
+    
+    2000: ldd r10, Y+17   ; R10:13 = A*4 = param_D
+    2002: ldd r11, Y+18
+    2004: ldd r12, Y+19
+    2006: ldd r13, Y+20
+    
+    2008: movw r16, r4  ; R2:5 = A*3 = param_C
+    200a: movw r14, r2
+
+    ; R18:21 = A*2 = param_B from above.
+
+    200c: movw r24, r8  ; R22:25 = A = param_A
+    200e: movw r22, r6
+    
+    2010: call 0xbe     ; 0xbe <manyParameters>
+    
+    ; Tidy parameters h, g, f and e off of the stack.
+    2014: in r20, SPL   ; Fetch SP into R20:R21
+    2016: in r21, SPH
+    2018: subi r20, 0xF0 ; Add 16 to R20:R21
+    201a: sbci r21, 0xFF 
+    201c: in r0, SREG   ; Read interrupt state
+    201e: cli           ; No interrupts
+    2020: out SPH, r29  ; Update SP
+    2022: out SREG, r0  ; Reset interrupt state
+    2024: out SPL, r28  ; Finish updating SP
+
+    2026: movw r26, r24  ; Copy uint32_t result from R22:R25 to R24:R27.
+    2028: movw r24, r22  ; This is for the call to Serial.Println(x)
+
+    202a: std Y+5, r24   ; X = result from manyParameters.
+    202c: std Y+6, r25
+    202e: std Y+7, r26
+    2030: std Y+8, r27
+    
+    Serial.println(x);   
+
+    ; Assembly ignored for Serial stuff. 
+
+} // end of setup()
+
+    ; Setup() postamble & tidy up code.
+
+    204a: adiw r28, 0x14 ; Reset SP to original value.
+    204c: in r0, SREG    ; Read SREG.
+    204e: cli            ; No interrupts.
+    2050: out SPH, r29   ; SPH.
+    2052: out SREG, r0   ; SREG - restore interrupt state.
+    2054: out SPL, r28   ; SPL.
+
+    2056: pop r29        ; Restore working registers.
+    2058: pop r28
+    205a: pop r17
+    205c: pop r16
+    205e: pop r15
+    2060: pop r14
+    2062: pop r13
+    2064: pop r12
+    2066: pop r11
+    2068: pop r10
+    206a: pop r9
+    206c: pop r8
+    206e: pop r7
+    2070: pop r6
+    2072: pop r5
+    2074: pop r4
+    2076: pop r3
+    2078: pop r2
+
+    207a: ret            ; End of setup()
