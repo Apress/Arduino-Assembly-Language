@@ -1,6 +1,6 @@
 LM75A Examples.
 
-There are a number of example sketches using the LM75A_Asm library. 
+There are a number of example sketches using the LM75A_LIB library. 
 These are:
 
 LM75A_Comparator - uses the LM75A in comparator mode to monitor 

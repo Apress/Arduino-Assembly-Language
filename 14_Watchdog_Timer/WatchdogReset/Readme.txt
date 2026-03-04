@@ -3,6 +3,8 @@ Watchdog Reset
 A sketch to blink an LED a few times, then configure the
 watchdog to reset the board after a couple of seconds.
 
+Requires the WDT library to be installed in the IDE.
+
 ==========================================================
 WARNING WARNING WARNING WARNING WARNING WARNING WARNING !!
 ==========================================================

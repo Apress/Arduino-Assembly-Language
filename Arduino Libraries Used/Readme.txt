@@ -115,8 +115,21 @@ I2C_ASM
 This library is fully described in the "I2C" chapter in the book. 
 
 It is a library to make accessing I2C sensors easy. It is also 
-used as the base for the LM75A library developed in the "LM75A"
-chapter.
+used as the base for the LM75A_LIB library developed in the 
+"LM75A" chapter.
 
 ***************************************************************
+
+=========
+LM75A_LIB
+=========
+
+This library is fully described in the "LM75A" chapter in the 
+book. 
+
+It is a library to make accessing LM75 sensors easy. It does 
+require the I2C_ASM library developed in the "I2C" chapter.
+
+***************************************************************
+
 
